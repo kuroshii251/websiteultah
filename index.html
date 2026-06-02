@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>A Perfect Birthday Surprise 💖</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+      background: linear-gradient(-45deg, #fff1f2, #fff0f6, #fae8ff, #fffbeb);
+      background-size: 400% 400%;
+      animation: ambientMesh 18s ease infinite;
+    }
+    
+    .font-romantic { font-family: 'Dancing Script', cursive; }
+
+    @keyframes ambientMesh {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* --- Page Transitions --- */
+    .page-stage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 10;
+      opacity: 0;
+      transform: scale(0.96) translateY(10px);
+      pointer-events: none;
+      transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                  transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .page-stage.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+
+    @keyframes floatParticle {
+      0% { transform: translateY(105vh) translateX(0) rotate(0deg); opacity: 0.7; }
+      50% { transform: translateY(50vh) translateX(25px) rotate(180deg); opacity: 0.4; }
+      100% { transform: translateY(-10vh) translateX(-25px) rotate(360deg); opacity: 0; }
+    }
+    .particle-item {
+      position: absolute;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatParticle var(--spd, 12s) linear infinite;
+      animation-delay: var(--del, 0s);
+    }
+
+    /* --- Premium 3D Envelope Geometry --- */
+    .envelope-3d-box {
+      perspective: 1500px;
+      width: 340px;
+      height: 230px;
+    }
+    .envelope-3d-body {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #9f1239, #4c0519);
+      border-radius: 18px;
+      box-shadow: 0 35px 70px rgba(76, 5, 25, 0.35), inset 0 1px 2px rgba(255,255,255,0.15);
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .envelope-3d-box.hover-active .envelope-3d-body {
+      transform: translateY(-8px) rotateX(8deg);
+    }
+    .envelope-flap-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 125px;
+      background: linear-gradient(to bottom, #881337, #4c0519);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 30;
+      filter: drop-shadow(0 6px 6px rgba(0,0,0,0.22));
+    }
+    .envelope-3d-body.opened .envelope-flap-top {
+      transform: rotateX(180deg);
+      z-index: 5;
+      filter: none;
+    }
+    .envelope-flap-left {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, #9f1239, #881337);
+      clip-path: polygon(0 0, 52% 50%, 0 100%);
+      z-index: 20;
+      border-radius: 18px 0 0 18px;
+    }
+    .envelope-flap-right {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to left, #9f1239, #881337);
+      clip-path: polygon(100% 0, 100% 100%, 48% 50%);
+      z-index: 20;
+      border-radius: 0 18px 18px 0;
+    }
+    .envelope-flap-bottom {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, #be123c, #9f1239);
+      clip-path: polygon(0 100%, 100% 100%, 50% 46%);
+      z-index: 21;
+      border-radius: 0 0 18px 18px;
+    }
+    
+    /* FIX: Sistem Kertas Terkunci (Anti-Ngintip Berbarengan) */
+    .envelope-inner-card {
+      position: absolute;
+      bottom: 12px;
+      left: 15px;
+      width: 310px;
+      height: 195px;
+      background: linear-gradient(135deg, #ffffff, #fff1f2);
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+      padding: 24px;
+      
+      /* Hidden State Awal */
+      opacity: 0;
+      visibility: hidden;
+      z-index: 1;
+      transform: translateY(0) scale(0.92);
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease, visibility 0.5s;
+    }
+    /* Aktif via kelas terpisah setelah penutup selesai berputar */
+    .envelope-3d-body.card-visible .envelope-inner-card {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-140px) scale(1.04);
+      z-index: 25;
+    }
+
+    /* ==================== HIGH-END STRUCTURAL 3D CAKE VIEWPORT ==================== */
+    .cake-viewport-3d {
+      perspective: 1200px;
+      width: 320px;
+      height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    
+    /* Base Plat Stand */
+    .cake-3d-plate {
+      position: relative;
+      width: 300px;
+      height: 18px;
+      background: linear-gradient(to right, #cbd5e1, #f8fafc, #94a3b8);
+      border-radius: 50%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.6);
+      z-index: 10;
+    }
+
+    /* Cake Tier Bottom (Lapis Bawah 3D) */
+    .cake-3d-tier-bottom {
+      position: relative;
+      width: 250px;
+      height: 90px;
+      background: linear-gradient(to right, #be123c, #fb7185 45%, #f43f5e 55%, #881337);
+      border-radius: 0 0 125px 125px / 0 0 32px 32px;
+      margin-bottom: 0;
+      z-index: 15;
+      box-shadow: inset 0 -5px 15px rgba(0,0,0,0.15);
+    }
+    .cake-3d-tier-bottom-top {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      width: 235px;
+      height: 42px;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #ffe4e6, #fecdd3);
+      border-radius: 50%;
+      border-bottom: 3px solid #fda4af;
+    }
+
+    /* Cake Tier Top (Lapis Atas 3D) */
+    .cake-3d-tier-top {
+      position: absolute;
+      bottom: 58px;
+      width: 180px;
+      height: 60px;
+      background: linear-gradient(to right, #9f1239, #fbcfe8 45%, #f43f5e 55%, #4c0519);
+      border-radius: 0 0 90px 90px / 0 0 24px 24px;
+      z-index: 20;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.12), inset 0 -4px 10px rgba(0,0,0,0.2);
+    }
+    .cake-3d-tier-top-surface {
+      position: absolute;
+      top: -18px;
+      left: 0;
+      width: 180px;
+      height: 38px;
+      background: linear-gradient(135deg, #ffffff, #fff1f2);
+      border-radius: 50%;
+      border-bottom: 3px solid #fecdd3;
+    }
+
+    /* --- Candle Infrastructure --- */
+    .candle-stick {
+      width: 14px;
+      height: 48px;
+      border-radius: 5px;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.18);
+    }
+    .candle-wick {
+      width: 2px;
+      height: 7px;
+      background-color: #334155;
+      position: absolute;
+      top: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .candle-flame-core {
+      width: 11px;
+      height: 20px;
+      background: linear-gradient(to bottom, #fff, #f59e0b, #ef4444);
+      border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+      position: absolute;
+      top: -26px;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      opacity: 0;
+      transform-origin: bottom center;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    }
+    .candle-flame-core.lit {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      animation: realisticFlicker 0.65s infinite ease-in-out alternate;
+    }
+    @keyframes realisticFlicker {
+      0% { transform: translateX(-50%) scale(1) rotate(-1.5deg); filter: drop-shadow(0 0 4px #f59e0b) drop-shadow(0 0 10px #ef4444); }
+      100% { transform: translateX(-50%) scale(1.08) rotate(1.5deg); filter: drop-shadow(0 0 6px #fb923c) drop-shadow(0 0 14px #f43f5e); }
+    }
+
+    /* --- FIX: Safe Layer Draggable Tokens --- */
+    .draggable-candle-token {
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+      z-index: 100;
+      will-change: transform;
+      transition: transform 0.1s ease-out;
+    }
+    .draggable-candle-token:active {
+      cursor: grabbing;
+    }
+    .candle-snapped-mode {
+      position: absolute !important;
+      cursor: default !important;
+      bottom: 12px !important; 
+      left: 50% !important;
+      margin-left: -7px; /* Setengah dari width (14px) agar presisi di tengah anchor */
+      transform: none !important;
+      filter: none !important;
+      z-index: 30 !important;
+    }
+
+    .bubble-item {
+      opacity: 0;
+      transform: translateY(15px);
+      transition: all 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .bubble-item.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .error-shake { animation: runShake 0.4s ease-in-out; }
+    @keyframes runShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    .curtain-screen { animation: curtainMotion 1.3s cubic-bezier(0.85, 0, 0.15, 1) forwards; }
+    @keyframes curtainMotion {
+      0% { opacity: 0; transform: scale(1.06); }
+      35%, 65% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.94); }
+    }
+  </style>
+</head>
+<body class="min-h-screen overflow-hidden relative select-none">
+
+  <div id="global-particle-canvas" class="fixed inset-0 pointer-events-none z-0"></div>
+  <div id="fx-curtain" class="fixed inset-0 bg-gradient-to-tr from-rose-500 via-pink-400 to-amber-200 z-50 opacity-0 pointer-events-none"></div>
+
+  <div id="stage-envelope" class="page-stage active space-y-6">
+    <div class="text-center space-y-2 max-w-sm px-4">
+      <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-rose-100/90 backdrop-blur-md text-rose-600 text-xs font-bold tracking-wider uppercase shadow-xs">
+        Pesan Rahasia 💌
+      </span>
+      <h1 class="text-2xl font-black text-slate-800 tracking-tight">Silakan buka amplop di bawah ini!</h1>
+      <p class="text-xs text-slate-400 font-semibold tracking-wide">Ketuk segel emas lilin untuk membuka berkas</p>
+    </div>
+
+    <div id="envelope-wrapper" class="envelope-3d-box select-none hover-active" onclick="triggerEnvelopeOpeningSequence()">
+      <div id="envelope-body-node" class="envelope-3d-body">
+        <div class="envelope-flap-top"></div>
+        <div class="envelope-flap-left"></div>
+        <div class="envelope-flap-right"></div>
+        <div class="envelope-flap-bottom"></div>
+        
+        <div id="wax-seal-badge" class="absolute top-[92px] left-1/2 -translate-x-1/2 w-14 h-14 bg-gradient-to-br from-yellow-300 via-amber-500 to-amber-700 rounded-full flex items-center justify-center shadow-2xl z-40 transition-all duration-500 border-2 border-amber-200/40 hover:scale-110 active:scale-95">
+          <div class="w-10 h-10 border border-amber-100/30 rounded-full flex items-center justify-center bg-amber-600/10">
+            <i data-lucide="heart" class="w-5 h-5 text-rose-950 fill-rose-900/90"></i>
+          </div>
+        </div>
+
+        <div class="envelope-inner-card flex flex-col items-center justify-center border border-rose-100/30 text-center">
+          <i data-lucide="sparkles" class="w-6 h-6 text-amber-500 mb-1 animate-bounce"></i>
+          <h4 class="font-romantic text-3xl text-rose-600 font-extrabold lowercase tracking-wide">strictly confidential</h4>
+          <p class="text-[9px] text-slate-400 uppercase tracking-widest mt-2 font-bold">Teruntuk kesayangan hatiku</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="stage-gatekeeper" class="page-stage">
+    <div class="bg-white/80 backdrop-blur-2xl p-8 rounded-3xl shadow-2xl border border-white/80 max-w-sm w-full text-center space-y-6 relative overflow-hidden">
+      <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-rose-500 via-pink-400 to-amber-300"></div>
+      <div class="w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto shadow-inner border border-rose-100/50">
+        <i data-lucide="lock" class="w-6 h-6"></i>
+      </div>
+      <div class="space-y-1">
+        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Akses Terkunci</h2>
+        <p class="text-xs text-slate-500 font-semibold">Masukkan kunci token kamu</p>
+      </div>
+      <div class="space-y-2">
+        <input type="password" id="gatekey-input" maxlength="8" placeholder="••••••••" inputmode="numeric" onkeydown="if(event.key==='Enter') verifyGatekeepingKey()"
+          class="w-full text-center text-2xl font-bold tracking-widest py-3.5 px-4 bg-rose-50/30 border-2 border-rose-100 rounded-2xl focus:outline-none focus:border-rose-400 focus:bg-white transition-all duration-300 shadow-inner">
+        <p id="gatekey-error-log" class="text-xs text-rose-500 font-bold min-h-[1rem]"></p>
+      </div>
+      <button onclick="verifyGatekeepingKey()" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:scale-[1.02] active:scale-[0.98] text-white font-bold text-sm py-3.5 px-6 rounded-2xl shadow-md transition-all duration-200">
+        Buka Lapisan Akses
+      </button>
+      <div class="text-[11px] text-amber-800 font-semibold bg-amber-50/80 backdrop-blur-xs p-3 rounded-xl border border-amber-100/70">
+        Clue: Tanggal lahir kamu (DDMMYYYY)
+      </div>
+    </div>
+  </div>
+
+  <div id="stage-identity" class="page-stage">
+    <div class="text-center max-w-md space-y-6 flex flex-col items-center">
+      <div class="w-34 h-34 rounded-full border-4 border-white shadow-2xl transform rotate-[-3deg] hover:rotate-0 transition-transform duration-500 overflow-hidden bg-slate-200 ring-8 ring-pink-500/5">
+        <img src="profile.png" class="w-full h-full object-cover" alt="Foto Profil" onerror="this.src='https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300'">
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-4xl font-black tracking-tight leading-none text-slate-800">
+          Selamat <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-500 font-romantic text-5xl lowercase">Ulang Tahun</span>
+        </h2>
+        <h3 class="text-2xl font-extrabold text-rose-500 mt-1">Sayangku Tercinta ❤️</h3>
+      </div>
+      <div class="min-h-[90px] flex items-center justify-center px-4">
+        <p id="typewriter-text-node" class="text-sm text-slate-600 leading-relaxed font-semibold max-w-sm"></p>
+      </div>
+      <button id="action-trigger-chat" onclick="switchStage('stage-messenger')" class="opacity-0 pointer-events-none transition-all duration-700 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm py-3 px-6 rounded-full inline-flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95">
+        Next <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <div id="stage-messenger" class="page-stage">
+    <div class="bg-white/85 backdrop-blur-2xl p-6 rounded-3xl shadow-2xl border border-white max-w-sm w-full space-y-4">
+      <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+        <div class="w-10 h-10 rounded-full bg-rose-400 flex items-center justify-center text-white font-bold text-sm overflow-hidden shadow-inner ring-2 ring-rose-100">
+          <img src="chico.png" alt="Chico" class="w-full h-full object-cover">
+        </div>
+        <div>
+          <h4 class="text-sm font-extrabold text-slate-800 tracking-tight">Jackson</h4>
+          <p class="text-[10px] text-emerald-500 font-bold flex items-center gap-1">● Online</p>
+        </div>
+      </div>
+      <div id="chat-thread-container" class="space-y-3.5 max-h-[270px] overflow-y-auto pr-1 text-xs font-semibold leading-relaxed">
+        <div class="bubble-item flex justify-start"><div class="bg-slate-100 text-slate-800 p-3.5 rounded-2xl rounded-tl-none max-w-[85%] shadow-xs border border-slate-200/20">Hai kamu, selamat ulang tahun ya! 🥰</div></div>
+        <div class="bubble-item flex justify-start"><div class="bg-slate-100 text-slate-800 p-3.5 rounded-2xl rounded-tl-none max-w-[85%] shadow-xs border border-slate-200/20">Makasih banyak ya udah lahir dan mau sedekat ini menemani duniaku sampai sekarang.</div></div>
+        <div class="bubble-item flex justify-start"><div class="bg-slate-100 text-slate-800 p-3.5 rounded-2xl rounded-tl-none max-w-[85%] shadow-xs border border-slate-200/20">Aku bener-bener beruntung bisa memiliki kamu dalam hidup. Jangan bosen-bosen sama aku ya? 🥺👉👈</div></div>
+      </div>
+      <button id="action-trigger-cake" onclick="switchStage('stage-patisserie')" class="w-full opacity-0 pointer-events-none transition-all duration-700 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2">
+        Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <div id="stage-patisserie" class="page-stage">
+    <div class="bg-white/80 backdrop-blur-2xl p-6 rounded-3xl shadow-2xl border border-white/90 max-w-md w-full h-auto text-center space-y-5 relative">
+      
+      <div class="space-y-1">
+        <h2 id="patisserie-headline" class="text-xl font-black text-slate-800 tracking-tight mt-1">Seret Lilin ke Atas Kue! 🕯️</h2>
+        <p id="patisserie-guideline" class="text-xs text-slate-500 px-2 font-medium">Geser lilin dari rak inventori di bawah, lalu lepas tepat di area permukaan atas kue.</p>
+      </div>
+
+    <div id="patisserie-drop-arena" class="relative w-full bg-gradient-to-b from-rose-50/50 via-indigo-50/10 to-pink-50/30 rounded-2xl border border-pink-100/70 flex flex-col items-center justify-end overflow-hidden shadow-inner" style="height: 420px; padding-bottom: 70px;">
+
+  <div id="mic-acoustic-badge" class="absolute inset-x-0 top-4 mx-auto max-w-[230px] flex flex-col items-center gap-1.5 bg-rose-500/5 border border-rose-200/50 p-2.5 rounded-xl opacity-0 scale-90 transition-all duration-500 z-40 backdrop-blur-md">
+    <div class="flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+      <span id="mic-acoustic-status-log" class="text-[9px] font-extrabold text-rose-600 uppercase tracking-widest">Tiup Mic Hp Kamu! 🎙️</span>
+    </div>
+    <div class="w-full h-1.5 bg-rose-100 rounded-full overflow-hidden shadow-inner">
+      <div id="mic-acoustic-level-bar" class="h-full w-0 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full transition-all duration-75"></div>
+    </div>
+  </div>
+
+  <div id="main-3d-cake-model" class="select-none" style="position:relative; width:300px; height:280px; margin-top: 70px; margin-bottom: 8px;">
+
+    <svg width="300" height="280" viewBox="0 0 300 280" xmlns="http://www.w3.org/2000/svg" style="position:absolute; inset:0; pointer-events:none;">
+
+      <ellipse cx="150" cy="272" rx="110" ry="9" fill="rgba(0,0,0,0.08)"/>
+      <ellipse cx="150" cy="263" rx="108" ry="12" fill="#e2e8f0"/>
+      <ellipse cx="150" cy="260" rx="100" ry="8" fill="#f8fafc"/>
+      <rect x="42" y="162" width="216" height="92" rx="8" fill="#be123c"/>
+      <ellipse cx="150" cy="162" rx="108" ry="14" fill="#fecdd3"/>
+      <ellipse cx="150" cy="162" rx="100" ry="9" fill="#ffe4e6"/>
+      <rect x="42" y="218" width="216" height="36" rx="8" fill="#9f1239" opacity="0.28"/>
+      <path d="M62,162 Q66,176 63,186" stroke="#fff1f2" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M96,160 Q100,175 97,185" stroke="#fff1f2" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M130,161 Q134,177 131,187" stroke="#fff1f2" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M168,160 Q172,175 169,185" stroke="#fff1f2" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M202,161 Q206,176 203,186" stroke="#fff1f2" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M234,162 Q238,176 235,186" stroke="#fff1f2" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+      <circle cx="78"  cy="184" r="4.5" fill="#fda4af"/>
+      <circle cx="104" cy="177" r="3.5" fill="#fb7185"/>
+      <circle cx="130" cy="184" r="4.5" fill="#fda4af"/>
+      <circle cx="150" cy="177" r="3.5" fill="#fb7185"/>
+      <circle cx="170" cy="184" r="4.5" fill="#fda4af"/>
+      <circle cx="196" cy="177" r="3.5" fill="#fb7185"/>
+      <circle cx="222" cy="184" r="4.5" fill="#fda4af"/>
+
+      <text x="150" y="215" text-anchor="middle" font-family="Georgia,serif" font-size="17" font-style="italic" fill="#fecdd3" opacity="0.95">Happy Birthday</text>
+
+      <rect x="90" y="80" width="120" height="82" rx="8" fill="#9f1239"/>
+      <ellipse cx="150" cy="80" rx="60" ry="11" fill="#fce7f3"/>
+      <ellipse cx="150" cy="80" rx="54" ry="7" fill="#fdf4f8"/>
+      <rect x="90" y="128" width="120" height="34" rx="8" fill="#7f1d2e" opacity="0.26"/>
+
+      <path d="M106,80 Q110,92 107,102" stroke="#fff0f6" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <path d="M132,78 Q136,91 133,101" stroke="#fff0f6" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <path d="M168,78 Q172,91 169,101" stroke="#fff0f6" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <path d="M190,80 Q194,92 191,102" stroke="#fff0f6" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+
+      <circle cx="114" cy="112" r="4" fill="#f9a8d4"/>
+      <circle cx="136" cy="106" r="3" fill="#f472b6"/>
+      <circle cx="150" cy="112" r="4" fill="#f9a8d4"/>
+      <circle cx="164" cy="106" r="3" fill="#f472b6"/>
+      <circle cx="186" cy="112" r="4" fill="#f9a8d4"/>
+
+    </svg>
+
+    <div id="cake-top-surface" style="position:absolute; top:64px; left:88px; width:124px; height:24px; pointer-events:all; display:flex; align-items:flex-end; justify-content:space-around; padding: 0 8px;">
+      <div id="anchor-slot-1" style="width:16px; height:16px; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; position:relative;"></div>
+      <div id="anchor-slot-2" style="width:16px; height:16px; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; position:relative;"></div>
+      <div id="anchor-slot-3" style="width:16px; height:16px; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; position:relative;"></div>
+    </div>
+
+  </div>
+
+  <div id="patisserie-hotbar-rack" class="absolute bottom-2 inset-x-0 max-w-[260px] mx-auto bg-white/90 backdrop-blur-md border border-pink-100/60 rounded-xl p-2 flex flex-col items-center gap-1 shadow-md z-50 transition-all duration-300">
+    <span class="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest">Rak Gudang Lilin</span>
+    <div class="flex gap-6 items-center justify-center h-16 w-full">
+      
+      <div id="vault-slot-1" class="w-14 h-14 border-2 border-dashed border-rose-200 rounded-lg flex items-end justify-center bg-rose-50/30 pb-1 relative">
+        <div id="rack-token-item-1" data-candle-id="1" class="draggable-candle-token candle-stick bg-gradient-to-b from-rose-300 to-pink-500">
+          <div class="candle-wick"></div>
+          <div id="flame-1" class="candle-flame-core"></div>
+          <div id="smoke-1" class="absolute -top-6 left-1/2 -translate-x-1/2 w-1 h-5 bg-slate-400/30 blur-xs rounded-full opacity-0 transition-all duration-700"></div>
+        </div>
+      </div>
+      
+      <div id="vault-slot-2" class="w-14 h-14 border-2 border-dashed border-amber-200 rounded-lg flex items-end justify-center bg-amber-50/30 pb-1 relative">
+        <div id="rack-token-item-2" data-candle-id="2" class="draggable-candle-token candle-stick bg-gradient-to-b from-amber-200 to-yellow-400">
+          <div class="candle-wick"></div>
+          <div id="flame-2" class="candle-flame-core"></div>
+          <div id="smoke-2" class="absolute -top-6 left-1/2 -translate-x-1/2 w-1 h-5 bg-slate-400/30 blur-xs rounded-full opacity-0 transition-all duration-700"></div>
+        </div>
+      </div>
+      
+      <div id="vault-slot-3" class="w-14 h-14 border-2 border-dashed border-purple-200 rounded-lg flex items-end justify-center bg-purple-50/30 pb-1 relative">
+        <div id="rack-token-item-3" data-candle-id="3" class="draggable-candle-token candle-stick bg-gradient-to-b from-purple-300 to-indigo-500">
+          <div class="candle-wick"></div>
+          <div id="flame-3" class="candle-flame-core"></div>
+          <div id="smoke-3" class="absolute -top-6 left-1/2 -translate-x-1/2 w-1 h-5 bg-slate-400/30 blur-xs rounded-full opacity-0 transition-all duration-700"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+      <button id="action-trigger-gift" onclick="switchStage('stage-giftwrap')", class="w-full opacity-0 pointer-events-none transition-all duration-700 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm py-3.5 px-6 rounded-xl shadow-lg flex items-center justify-center gap-2">
+        Buka Kado Selanjutnya ✨ 🎁
+      </button>
+    </div>
+  </div>
+
+  <div id="stage-giftwrap" class="page-stage">
+    <div class="text-center max-w-sm w-full space-y-8">
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-amber-800 text-[10px] font-extrabold uppercase tracking-widest mx-auto">
+          ⭐ Progres: Tata Lilin (<span id="placed-candles-counter">0/3</span>) ⭐
+        </div>
+        <span class="bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Spesial Untukmu 🎁</span>
+        <h2 id="giftwrap-headline" class="text-2xl font-extrabold text-slate-800 tracking-tight mt-1">Ketuk Kadonya untuk Membuka! ✨</h2>
+        <p id="giftwrap-subtext" class="text-xs text-slate-500 font-medium">Ada kejutan manis yang menunggumu di dalam...</p>
+      </div>
+      <div class="relative py-10 flex justify-center items-center cursor-pointer select-none group" onclick="unwrapSurpriseGiftBox()">
+        <div id="gift-lid-node" class="absolute top-[32px] w-36 h-8 bg-rose-500 rounded-t-md shadow-md z-30 transition-all duration-500 ease-out origin-bottom group-hover:-translate-y-2">
+          <div class="absolute inset-x-0 mx-auto -top-2.5 w-8 h-2.5 bg-amber-400 rounded-t-full"></div>
+          <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-6 bg-amber-400"></div>
+        </div>
+        <div id="gift-body-node" class="w-32 h-32 bg-gradient-to-br from-rose-400 to-pink-500 rounded-b-lg shadow-2xl relative z-20 transition-transform duration-500 group-hover:scale-102">
+          <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-6 bg-amber-400"></div>
+          <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-6 bg-amber-400"></div>
+        </div>
+        <div id="gift-sparkle-fx-node" class="absolute text-4xl opacity-0 scale-0 transition-all duration-700 z-10 pointer-events-none">💝✨🎵</div>
+      </div>
+      <button id="action-trigger-music" onclick="switchStage('stage-jukebox')" class="w-full opacity-0 pointer-events-none transition-all duration-700 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold text-sm py-3.5 px-6 rounded-xl shadow-md flex items-center justify-center gap-2">
+        Next
+      </button>
+    </div>
+  </div>
+
+  <div id="stage-jukebox" class="page-stage bg-gradient-to-br from-purple-900/40 via-pink-900/30 to-slate-900/20 text-white backdrop-blur-md">
+    <div class="max-w-sm w-full bg-white/10 backdrop-blur-2xl border border-white/20 p-6 rounded-3xl shadow-2xl text-center space-y-6">
+      <span class="text-[10px] uppercase tracking-widest bg-white/25 text-white px-4 py-1.5 rounded-full font-extrabold border border-white/10 shadow-xs">
+        Playlist Favoritmu 🎵
+      </span>
+      <div class="w-full rounded-2xl overflow-hidden shadow-2xl bg-black/20 p-1 border border-white/10">
+        <iframe id="spotify-player-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/track/2Z8m0u6wPSb8w7gZg7gZg7" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" class="rounded-xl"></iframe>
+      </div>
+      <button onclick="terminateJukeboxPlaybackAndProceed()" class="w-full bg-gradient-to-r from-rose-400 via-pink-500 to-red-500 text-white font-bold text-sm py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+        <span>Next</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="stage-archive" class="page-stage bg-gradient-to-b from-rose-50/60 to-pink-100/40">
+    <div class="max-w-md w-full text-center space-y-8 my-auto">
+      <h2 class="text-3xl font-black tracking-tight text-slate-800">
+        Galeri <span class="font-romantic text-4xl text-rose-500 lowercase block sm:inline">Kenangan Indah</span>
+      </h2>
+      <div class="grid grid-cols-3 gap-4 px-1 justify-center items-center">
+        <div class="bg-white p-2 pb-5 rounded-md shadow-2xl border border-slate-100 transform -rotate-6 hover:rotate-0 hover:scale-110 hover:z-20 transition-all duration-300 cursor-pointer">
+          <div class="aspect-[3/4] bg-slate-100 rounded-xs overflow-hidden mb-2"><img src="foto1.jpg" alt="Memory 1" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=150'"></div>
+          <span class="font-romantic text-[11px] text-slate-500 block text-center tracking-wider">kamu & aku uwu</span>
+        </div>
+        <div class="bg-white p-2 pb-5 rounded-md shadow-2xl border border-slate-100 transform rotate-3 -translate-y-2 hover:rotate-0 hover:scale-110 hover:z-20 transition-all duration-300 cursor-pointer">
+          <div class="aspect-[3/4] bg-slate-100 rounded-xs overflow-hidden mb-2"><img src="foto2.jpg" alt="Memory 2" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=150'"></div>
+          <span class="font-romantic text-[11px] text-slate-500 block text-center tracking-wider">momen indah ✨</span>
+        </div>
+        <div class="bg-white p-2 pb-5 rounded-md shadow-2xl border border-slate-100 transform -rotate-3 hover:rotate-0 hover:scale-110 hover:z-20 transition-all duration-300 cursor-pointer">
+          <div class="aspect-[3/4] bg-slate-100 rounded-xs overflow-hidden mb-2"><img src="foto3.jpg" alt="Memory 3" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'"></div>
+          <span class="font-romantic text-[11px] text-slate-500 block text-center tracking-wider">tertawa lepas 🤍</span>
+        </div>
+      </div>
+      <button onclick="switchStage('stage-epilogue')" class="w-full bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-bold text-sm py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-md transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.97]">
+        <span>Next</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="stage-epilogue" class="page-stage">
+    <div class="max-w-sm w-full bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-rose-100/50 text-center space-y-6 relative">
+      <div class="text-4xl animate-bounce">🌙✨💖</div>
+      <h2 class="text-2xl font-black text-slate-800 tracking-tight">Pesan Terakhir...</h2>
+      <p class="text-sm text-slate-600 leading-relaxed font-semibold italic">
+        "I love you more than yesterday, and less than tomorrow. Terima kasih banyak sudah hadir membawa kehangatan dan kebahagiaan di dalam hidupku selama ini. Kamu adalah kado terbaik yang pernah semesta berikan."
+      </p>
+      <hr class="border-dashed border-rose-200">
+      <div class="space-y-1">
+        <h3 class="font-romantic text-4xl text-rose-500 lowercase">The End</h3>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Floating Ambient Canvas Particles
+    (function initBackgroundFloatingParticles() {
+      const parent = document.getElementById('global-particle-canvas');
+      const emojis = ['❤️', '✨', '🌸', '⭐', '💖', '🧸'];
+      for (let i = 0; i < 28; i++) {
+        const item = document.createElement('div');
+        item.className = 'particle-item select-none text-base opacity-40';
+        item.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        item.style.setProperty('--spd', `${Math.random() * 7 + 7}s`);
+        item.style.setProperty('--del', `${Math.random() * 6}s`);
+        item.style.left = `${Math.random() * 100}%`;
+        item.style.fontSize = `${Math.random() * 14 + 14}px`;
+        parent.appendChild(item);
+      }
+    })();
+
+    // Stage Navigation Engine
+    function switchStage(targetStageId) {
+      const curtain = document.getElementById('fx-curtain');
+      curtain.classList.add('curtain-screen', 'pointer-events-auto');
+      
+      setTimeout(() => {
+        document.querySelectorAll('.page-stage').forEach(stage => stage.classList.remove('active'));
+        const destination = document.getElementById(targetStageId);
+        if (destination) destination.classList.add('active');
+        
+        if (targetStageId === 'stage-identity') runTypewriterEffectSequence();
+        if (targetStageId === 'stage-messenger') runChatThreadWaterfallSequence();
+        if (targetStageId === 'stage-patisserie') runPerfectDragAndDropEngine();
+      }, 450);
+
+      curtain.addEventListener('animationend', () => {
+        curtain.classList.remove('curtain-screen', 'pointer-events-auto');
+      }, { once: true });
+    }
+
+    // Stage 1: FIX - Sekuens Amplop Koreografi Terpisah (Anti-Simultan)
+    let envelopeStateLock = false;
+    function triggerEnvelopeOpeningSequence() {
+      if (envelopeStateLock) return;
+      envelopeStateLock = true;
+
+      const body = document.getElementById('envelope-body-node');
+      const seal = document.getElementById('wax-seal-badge');
+      const wrapper = document.getElementById('envelope-wrapper');
+      
+      wrapper.classList.remove('hover-active');
+      seal.style.transform = 'translateY(-50px) scale(0) rotate(360deg)';
+      seal.style.opacity = '0';
+      
+      // Tahap 1: Flap / Penutup Atas Terbuka Terlebih Dahulu
+      body.classList.add('opened');
+
+      // Tahap 2: Kertas Keluar Baru Dipicu Setelah 700ms (Saat Flap Selesai Berputar)
+      setTimeout(() => {
+        body.classList.add('card-visible');
+      }, 700);
+
+      // Tahap 3: Pindah Ke Halaman Input Kunci Keamanan
+      setTimeout(() => {
+        switchStage('stage-gatekeeper');
+        setTimeout(() => document.getElementById('gatekey-input').focus(), 800);
+      }, 2300);
+    }
+
+    // Stage 2: Gatekeeper Key Validation
+    const SECRET_TOKEN_KEY = '10082004'; 
+    function verifyGatekeepingKey() {
+      const input = document.getElementById('gatekey-input');
+      const logger = document.getElementById('gatekey-error-log');
+      
+      if (input.value.trim() === SECRET_TOKEN_KEY) {
+        logger.textContent = '';
+        switchStage('stage-identity');
+      } else {
+        logger.textContent = 'Kombinasi salah, dipikir lagi pelan-pelan sayang... 🥺👉👈';
+        input.classList.add('error-shake');
+        input.value = '';
+        setTimeout(() => input.classList.remove('error-shake'), 450);
+      }
+    }
+
+    // Stage 3: Dynamic Typography Stream
+const genericParagraphStream = "Happy birthday, sayang! Semoga di umur yang baru ini kamu selalu sehat, bahagia, dan semua yang kamu cita-citakan bisa tercapai. Terima kasih sudah selalu ada, sudah sabar menghadapi aku, dan sudah jadi alasan banyak senyumku akhir-akhir ini. Semoga hari ini menyenangkan buat kamu, dan semoga aku masih bisa ikut merayakan banyak ulang tahunmu berikutnya. ❤️";    let typewriterCharIndex = 0;
+    function runTypewriterEffectSequence() {
+      const targetNode = document.getElementById('typewriter-text-node');
+      const actionButton = document.getElementById('action-trigger-chat');
+      targetNode.textContent = "";
+      typewriterCharIndex = 0;
+      
+      function streamTicks() {
+        if (typewriterCharIndex < genericParagraphStream.length) {
+          targetNode.textContent += genericParagraphStream.charAt(typewriterCharIndex);
+          typewriterCharIndex++;
+          setTimeout(streamTicks, 35);
+        } else {
+          actionButton.classList.remove('opacity-0', 'pointer-events-none');
+          actionButton.classList.add('opacity-100', 'pointer-events-auto');
+        }
+      }
+      setTimeout(streamTicks, 500);
+    }
+
+    // Stage 4: Chat Waterfalls
+    function runChatThreadWaterfallSequence() {
+      const items = document.querySelectorAll('.bubble-item');
+      const triggerBtn = document.getElementById('action-trigger-cake');
+      
+      items.forEach((node, index) => {
+        setTimeout(() => {
+          node.classList.add('revealed');
+          const scroller = document.getElementById('chat-thread-container');
+          scroller.scrollTop = scroller.scrollHeight;
+        }, (index + 1) * 1200); 
+      });
+      
+      setTimeout(() => {
+        triggerBtn.classList.remove('opacity-0', 'pointer-events-none');
+        triggerBtn.classList.add('opacity-100', 'pointer-events-auto');
+      }, (items.length * 1200) + 400);
+    }
+
+    // ==================== FIX: ARSITEKTUR DRAG ENGINE MATRIX 3D ANTI-GHAIB ====================
+    let globalPlacedCandlesCounter = 0;
+    const maxTargetCandlesCount = 3;
+    let micEngineBlownLock = false;
+    let localStreamRef = null;
+    let localAudioContext = null;
+    let loopAnimationFrameId = null;
+    let dragEngineInitialised = false;
+
+    function runPerfectDragAndDropEngine() {
+      if (dragEngineInitialised) return;
+      dragEngineInitialised = true;
+
+      const tokens = document.querySelectorAll('.draggable-candle-token');
+      const surfaceTarget = document.getElementById('cake-top-surface');
+
+      tokens.forEach(token => {
+        let activePointerId = null;
+        let startPointerX = 0;
+        let startPointerY = 0;
+
+        token.addEventListener('pointerdown', function(e) {
+          if (activePointerId !== null) return;
+          e.preventDefault();
+          
+          activePointerId = e.pointerId;
+          token.setPointerCapture(e.pointerId);
+          
+          startPointerX = e.clientX;
+          startPointerY = e.clientY;
+
+          token.style.transition = 'none'; // Matikan transisi saat ditarik agar sinkron
+          token.style.zIndex = '9999';
+
+          token.addEventListener('pointermove', onPointerMove);
+          token.addEventListener('pointerup', onPointerUp);
+          token.addEventListener('pointercancel', onPointerUp);
+        });
+
+        function onPointerMove(e) {
+          if (e.pointerId !== activePointerId) return;
+          
+          // Hitung Delta Jarak Geser Realtime
+          const deltaX = e.clientX - startPointerX;
+          const deltaY = e.clientY - startPointerY;
+
+          // Gunakan Matrix 3D translation tanpa merubah properti 'position' asli agar tidak ghaib
+          token.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(1.15)`;
+        }
+
+        function onPointerUp(e) {
+          if (e.pointerId !== activePointerId) return;
+          
+          token.releasePointerCapture(activePointerId);
+          activePointerId = null;
+          
+          token.removeEventListener('pointermove', onPointerMove);
+          token.removeEventListener('pointerup', onPointerUp);
+          token.removeEventListener('pointercancel', onPointerUp);
+
+          // Deteksi presisi batas koordinat permukaan atas kue
+          const surfaceRect = surfaceTarget.getBoundingClientRect();
+          const dropX = e.clientX;
+          const dropY = e.clientY;
+
+          if (dropX >= surfaceRect.left && dropX <= surfaceRect.right &&
+              dropY >= surfaceRect.top && dropY <= surfaceRect.bottom) {
+            
+            // TARGET HIT: Lilin masuk ke dalam Anchor Slot di permukaan kue
+            globalPlacedCandlesCounter++;
+            const destinationAnchor = document.getElementById(`anchor-slot-${globalPlacedCandlesCounter}`);
+
+            if (destinationAnchor) {
+              destinationAnchor.appendChild(token);
+              
+              // Reset transform total karena properti posisi diambil alih kelas candle-snapped-mode
+              token.removeAttribute('style'); 
+              token.classList.add('candle-snapped-mode');
+              token.style.pointerEvents = 'none'; // Kunci elemen agar tidak bisa ditarik lagi
+            }
+
+            document.getElementById('placed-candles-counter').textContent = `${globalPlacedCandlesCounter}/${maxTargetCandlesCount}`;
+
+            if (globalPlacedCandlesCounter === maxTargetCandlesCount) {
+              setTimeout(() => {
+                document.getElementById('patisserie-hotbar-rack').classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+                triggerAutoIgnitionSequence();
+              }, 500);
+            }
+
+          } else {
+            // TARGET MISS: Kembalikan lilin ke posisi rak semula dengan transisi smooth
+            token.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            token.style.transform = 'translate3d(0, 0, 0) scale(1)';
+            token.style.zIndex = '100';
+          }
+        }
+      });
+    }
+
+    function triggerAutoIgnitionSequence() {
+      const headline = document.getElementById('patisserie-headline');
+      const guideline = document.getElementById('patisserie-guideline');
+      
+      headline.textContent = "Menyalakan Sumbu Lilin... 🪄";
+      guideline.textContent = "Sumbu menyala berurutan secara otomatis, siap siap ditiup ya...";
+
+      for (let i = 1; i <= maxTargetCandlesCount; i++) {
+        setTimeout(() => {
+          const coreFlame = document.getElementById(`flame-${i}`);
+          if (coreFlame) coreFlame.classList.add('lit');
+
+          if (i === maxTargetCandlesCount) {
+            setTimeout(() => {
+              headline.textContent = "Make a Wish & Tiup Lilinya! 😙💨";
+              guideline.textContent = "Dekatkan bibir ke arah microphone, lalu tiup dengan kencang!";
+              activateMicrophoneAcousticEngine();
+            }, 800);
+          }
+        }, i * 450);
+      }
+    }
+
+    // Audio Analysis Tiup Microphone
+    function activateMicrophoneAcousticEngine() {
+      const badge = document.getElementById('mic-acoustic-badge');
+      const dynamicLiveBar = document.getElementById('mic-acoustic-level-bar');
+      if (badge) badge.classList.remove('opacity-0', 'scale-90');
+
+      navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        .then(stream => {
+          localStreamRef = stream;
+          localAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const source = localAudioContext.createMediaStreamSource(stream);
+          const analyser = localAudioContext.createAnalyser();
+          
+          analyser.fftSize = 256;
+          source.connect(analyser);
+          const bufferLength = analyser.fftSize;
+          const dataArray = new Uint8Array(bufferLength);
+          
+          function captureAnalysisTicks() {
+            if (micEngineBlownLock) return;
+            analyser.getByteTimeDomainData(dataArray);
+
+            let totalVarianceSum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+              const normalisationValue = (dataArray[i] - 128) / 128;
+              totalVarianceSum += normalisationValue * normalisationValue;
+            }
+            
+            let amplitudeRMS = Math.sqrt(totalVarianceSum / bufferLength);
+            let computedBarWidth = Math.min(amplitudeRMS * 390, 100); 
+            if (dynamicLiveBar) dynamicLiveBar.style.width = `${computedBarWidth}%`;
+
+            if (amplitudeRMS > 0.19) {
+              micEngineBlownLock = true;
+              extinguishAllCandlesComplete();
+              return;
+            }
+            loopAnimationFrameId = requestAnimationFrame(captureAnalysisTicks);
+          }
+          captureAnalysisTicks();
+        })
+        .catch(err => {
+          const alternativeGuideline = document.getElementById('patisserie-guideline');
+          if (alternativeGuideline) {
+            alternativeGuideline.textContent = "Akses mic terhalang. Ketuk/Tap area kue untuk langsung meniup lilinnya! ❤️";
+          }
+          document.getElementById('patisserie-drop-arena').setAttribute('onclick', 'extinguishAllCandlesComplete()');
+        });
+    }
+
+    function extinguishAllCandlesComplete() {
+      if (loopAnimationFrameId) cancelAnimationFrame(loopAnimationFrameId);
+      if (localStreamRef) localStreamRef.getTracks().forEach(track => track.stop());
+      if (localAudioContext) localAudioContext.close();
+
+      const badgeNode = document.getElementById('mic-acoustic-badge');
+      if (badgeNode) badgeNode.remove();
+
+      const mainHeadline = document.getElementById('patisserie-headline');
+      const mainGuideline = document.getElementById('patisserie-guideline');
+      const actionTriggerBtn = document.getElementById('action-trigger-gift');
+
+      for (let i = 1; i <= maxTargetCandlesCount; i++) {
+        const coreFlame = document.getElementById(`flame-${i}`);
+        const smokePuff = document.getElementById(`smoke-${i}`);
+        if (coreFlame) {
+          coreFlame.classList.remove('lit');
+          coreFlame.style.transform = 'scale(0)';
+          coreFlame.style.opacity = '0';
+        }
+        if (smokePuff) {
+          smokePuff.style.opacity = '1';
+          smokePuff.style.transform = 'translateY(-30px)';
+        }
+      }
+
+      mainHeadline.innerHTML = "Horeee, Lilinnya Padam! 🥳🎉";
+      mainGuideline.textContent = "Selamat ulang tahun sayang! Semua impianmu telah terkirim menuju semesta. ❤️";
+      
+      triggerConfettiExplosionRain();
+
+      setTimeout(() => {
+        actionTriggerBtn.classList.remove('opacity-0', 'pointer-events-none');
+        actionTriggerBtn.classList.add('opacity-100', 'pointer-events-auto');
+      }, 1000);
+    }
+
+    // Stage 6: Gift Unwrap Action
+    let giftBoxOpenedLock = false;
+    function unwrapSurpriseGiftBox() {
+      if (giftBoxOpenedLock) return;
+      giftBoxOpenedLock = true;
+      
+      const lid = document.getElementById('gift-lid-node');
+      const body = document.getElementById('gift-body-node');
+      const sparkle = document.getElementById('gift-sparkle-fx-node');
+      const headline = document.getElementById('giftwrap-headline');
+      const subtext = document.getElementById('giftwrap-subtext');
+      const actionTriggerBtn = document.getElementById('action-trigger-music');
+
+      lid.style.transform = 'translateY(-50px) rotate(15deg) scale(0.92)';
+      lid.style.opacity = '0';
+      body.style.transform = 'scale(1.05)';
+      sparkle.style.opacity = '1';
+      sparkle.style.transform = 'scale(2) translateY(-30px)';
+
+      headline.textContent = "Kadonya Berhasil Dibuka! 🎁✨";
+      subtext.textContent = "Satu hal terakhir yang ingin aku persembahkan untukmu...";
+      
+      triggerConfettiExplosionRain();
+      
+      setTimeout(() => {
+        actionTriggerBtn.classList.remove('opacity-0', 'pointer-events-none');
+        actionTriggerBtn.classList.add('opacity-100', 'pointer-events-auto');
+      }, 650);
+    }
+
+    // Stage 7: Playlist Buffer Eraser
+    function terminateJukeboxPlaybackAndProceed() {
+      const iframe = document.getElementById('spotify-player-iframe');
+      if (iframe) {
+        const cachedSource = iframe.src;
+        iframe.src = '';
+        iframe.src = cachedSource;
+      }
+      switchStage('stage-archive');
+    }
+
+    // Vector Confetti Rain System
+    function triggerConfettiExplosionRain() {
+      for (let i = 0; i < 75; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'fixed top-[-25px] w-3 h-3 z-40 pointer-events-none select-none';
+          confetti.textContent = Math.random() > 0.5 ? '❤️' : '🌸';
+          confetti.style.left = `${Math.random() * 100}%`;
+          confetti.style.fontSize = `${Math.random() * 10 + 12}px`;
+          
+          const internalDuration = Math.random() * 2 + 2;
+          confetti.style.transition = `transform ${internalDuration}s linear, top ${internalDuration}s linear, opacity ${internalDuration}s ease-out`;
+          
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => {
+            confetti.style.top = '110vh';
+            confetti.style.transform = `rotate(${Math.random() * 360}deg) translateX(${Math.random() * 40 - 20}px)`;
+          }, 30);
+          
+          setTimeout(() => confetti.remove(), internalDuration * 1000);
+        }, i * 35);
+      }
+    }
+  </script>
+</body>
+</html>
